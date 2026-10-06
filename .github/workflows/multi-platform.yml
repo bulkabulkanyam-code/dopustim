@@ -1,0 +1,33 @@
+name: Build Geode Mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target:
+          - Win64
+          - Android32
+          - Android64
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Geode mod
+        uses: geode-sdk/build-geode-mod@main
+        id: build
+        with:
+          target: ${{ matrix.target }}
+          sdk: latest
+
+      - name: Upload .geode
+        uses: actions/upload-artifact@v4
+        with:
+          name: dopustim-${{ matrix.target }}
+          path: ${{ steps.build.outputs.build-output }}
