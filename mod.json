@@ -1,0 +1,164 @@
+{
+  "geode": "5.10.1",
+  "gd": {
+    "win": "2.2081",
+    "android": "2.2081"
+  },
+  "id": "seby.frame_window_mod",
+  "name": "Frame Window Mod",
+  "version": "v0.1.0",
+  "developer": "Seby",
+  "description": "Measures the frame window of every input of a GDR replay with the real game physics, and computes NaNDL precision (L*).",
+  "tags": [
+    "utility"
+  ],
+  "early-load": false,
+  "settings": {
+    "presses": {
+      "type": "bool",
+      "name": "Measure presses",
+      "description": "Measure the frame window of every press (click).",
+      "default": true
+    },
+    "releases": {
+      "type": "bool",
+      "name": "Measure releases",
+      "description": "Also measure releases. Slower; windows of releases are usually not counted by NaNDL-style precision.",
+      "default": false
+    },
+    "player1": {
+      "type": "bool",
+      "name": "Player 1 inputs",
+      "description": "Include inputs of player 1.",
+      "default": true
+    },
+    "player2": {
+      "type": "bool",
+      "name": "Player 2 inputs",
+      "description": "Include inputs of player 2 (dual levels).",
+      "default": true
+    },
+    "keep-hold": {
+      "type": "bool",
+      "name": "Keep hold length",
+      "description": "When a press is moved, move its release by the same amount (measures the whole click). Off: only the single input is moved.",
+      "default": false
+    },
+    "full-completion": {
+      "type": "bool",
+      "name": "Validate to completion",
+      "description": "Each candidate must complete the whole level. Exact but slower. Off: the candidate must survive the validation horizon.",
+      "default": false
+    },
+    "horizon": {
+      "type": "int",
+      "name": "Validation horizon (s)",
+      "description": "Seconds the run must survive after the moved input (ignored when validating to completion). Longer is safer for inputs whose mistakes show up late.",
+      "default": 5,
+      "min": 1,
+      "max": 120
+    },
+    "max-window": {
+      "type": "int",
+      "name": "Max window",
+      "description": "Stop searching once the window is known to exceed this many ticks (the value is then shown as 'N+'). Larger = more exact, slower.",
+      "default": 10,
+      "min": 1,
+      "max": 1000
+    },
+    "repeats": {
+      "type": "int",
+      "name": "Repeats per candidate",
+      "description": "Run every candidate this many times; inputs where results disagree are marked unstable (random triggers etc.).",
+      "default": 1,
+      "min": 1,
+      "max": 5
+    },
+    "from-input": {
+      "type": "int",
+      "name": "From input #",
+      "description": "First input number to analyze (1 = first).",
+      "default": 1,
+      "min": 1,
+      "max": 1000000
+    },
+    "to-input": {
+      "type": "int",
+      "name": "To input #",
+      "description": "Last input number to analyze (0 = until the end).",
+      "default": 0,
+      "min": 0,
+      "max": 1000000
+    },
+    "speed": {
+      "type": "string",
+      "name": "Speed",
+      "description": "How fast the simulation runs. Max uses about 12 ms of every frame.",
+      "default": "Max",
+      "one-of": [
+        "1x",
+        "5x",
+        "20x",
+        "Max"
+      ]
+    },
+    "mute": {
+      "type": "bool",
+      "name": "Mute during analysis",
+      "description": "Silence music and effects while the analysis runs (every trial restarts the level).",
+      "default": true
+    },
+    "input-phase": {
+      "type": "string",
+      "name": "Input phase",
+      "description": "When inputs are applied inside a physics step. Auto picks 'After commands' for Mega Hack replays. Change it if Verify fails on a replay that is known to be good.",
+      "default": "Auto",
+      "one-of": [
+        "Auto",
+        "Before commands",
+        "After commands"
+      ]
+    },
+    "p-respawn": {
+      "type": "float",
+      "name": "Precision: respawn (s)",
+      "description": "Time between a death and the next attempt, added to every input time.",
+      "default": 0.0,
+      "min": 0.0
+    },
+    "p-target": {
+      "type": "float",
+      "name": "Precision: target time (s)",
+      "description": "Expected time to complete the level that L* is solved for (86400 = 24 hours).",
+      "default": 86400.0,
+      "min": 1.0
+    },
+    "p-kt": {
+      "type": "float",
+      "name": "Precision: Nerve k_T",
+      "description": "Time-dependent nerve constant (default calibrated by NaN GD / Frame Window Counter).",
+      "default": 0.0016520833717346,
+      "min": 0.0
+    },
+    "p-ku": {
+      "type": "float",
+      "name": "Precision: Fatigue k_U",
+      "description": "Input-count fatigue constant.",
+      "default": 0.0002727763242154,
+      "min": 0.0
+    },
+    "p-kc": {
+      "type": "float",
+      "name": "Precision: CPS k_C",
+      "description": "High click-frequency penalty constant.",
+      "default": 0.2784421686721826,
+      "min": 0.0
+    },
+    "p-releases": {
+      "type": "bool",
+      "name": "Precision: include releases",
+      "description": "Use release windows as inputs in the L* model too.",
+      "default": false
+    }
+  }
+}
