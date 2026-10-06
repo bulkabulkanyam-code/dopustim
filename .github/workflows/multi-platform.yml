@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         target:
           - Win64
@@ -19,13 +20,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Clang 19
+      - name: Install LLVM 19
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-19 clang++-19 lld-19 llvm-19
-          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+          wget -q https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 19
+
+          echo "/usr/lib/llvm-19/bin" >> "$GITHUB_PATH"
+
+          export PATH="/usr/lib/llvm-19/bin:$PATH"
+
+          echo "clang:"
+          which clang
           clang --version
+
+          echo "clang++:"
+          which clang++
           clang++ --version
 
       - name: Build Geode mod
