@@ -6,14 +6,25 @@
   },
   "id": "seby.frame_window_mod",
   "name": "Frame Window Mod",
-  "version": "v0.1.0",
+  "version": "v0.3.0",
   "developer": "Seby",
-  "description": "Measures the frame window of every input of a GDR replay with the real game physics, and computes NaNDL precision (L*).",
+  "description": "Measures the frame window of every input of a GDR replay with the real game physics, shows it as coloured circles while the replay plays, and computes NaNDL precision (L*). S&Q setting: Fast, Accurate or Ultra Fast.",
   "tags": [
     "utility"
   ],
   "early-load": false,
   "settings": {
+    "speed-quality": {
+      "type": "string",
+      "name": "S&Q (Speed and Quality)",
+      "description": "The main setting. Fast & Medium: saved game states at quiet moments + early pass (the v0.2 behaviour). Slow & Accurate: no saved states, no early pass, validation of at least 15 s and a gap scan behind failing shifts. Ultra Fast & Inaccurate: saved states at ANY tick (also while a button is held), no level restart between trials, short validation; not exact. The settings \"Saved game states\", \"Early pass\" and \"Control run\" below only apply to Fast & Medium.",
+      "default": "Fast & Medium",
+      "one-of": [
+        "Fast & Medium",
+        "Slow & Accurate",
+        "Ultra Fast & Inaccurate"
+      ]
+    },
     "presses": {
       "type": "bool",
       "name": "Measure presses",
@@ -38,11 +49,16 @@
       "description": "Include inputs of player 2 (dual levels).",
       "default": true
     },
-    "keep-hold": {
-      "type": "bool",
-      "name": "Keep hold length",
-      "description": "When a press is moved, move its release by the same amount (measures the whole click). Off: only the single input is moved.",
-      "default": false
+    "hold-mode": {
+      "type": "string",
+      "name": "Hold handling",
+      "description": "How a press is moved relative to its release. Auto: short taps (up to 3 ticks, spam) move together with their release, long holds move only the press - avoids fake 1-frame windows in tap sections. Keep hold: always move the whole click. Press only: only the press moves.",
+      "default": "Auto",
+      "one-of": [
+        "Auto",
+        "Keep hold",
+        "Press only"
+      ]
     },
     "full-completion": {
       "type": "bool",
@@ -64,6 +80,26 @@
       "description": "Stop searching once the window is known to exceed this many ticks (the value is then shown as 'N+'). Larger = more exact, slower.",
       "default": 10,
       "min": 1,
+      "max": 1000
+    },
+    "snapshots": {
+      "type": "bool",
+      "name": "Saved game states (Fast & Medium)",
+      "description": "Start every trial from a saved game state taken shortly before the input instead of replaying the level from 0%. Verified by a self-test and by control runs; if the game does not restore states exactly the mod switches back to full replays on its own.",
+      "default": true
+    },
+    "fast-validate": {
+      "type": "bool",
+      "name": "Early pass (Fast & Medium)",
+      "description": "End a trial as soon as the run is identical to the original again for half a second. Much faster in cube sections; turn off if you want every trial to run for the whole validation horizon.",
+      "default": true
+    },
+    "control-every": {
+      "type": "int",
+      "name": "Control run every N inputs (Fast & Medium)",
+      "description": "Re-run the unmodified replay from a saved state every N inputs to detect drift (0 = off). Costs about 1/N extra trials.",
+      "default": 25,
+      "min": 0,
       "max": 1000
     },
     "repeats": {
@@ -101,6 +137,14 @@
         "20x",
         "Max"
       ]
+    },
+    "time-budget": {
+      "type": "int",
+      "name": "Time per frame (ms)",
+      "description": "Milliseconds of every rendered frame spent on the analysis at Max speed. Higher = faster analysis, lower frame rate while it runs.",
+      "default": 30,
+      "min": 4,
+      "max": 200
     },
     "mute": {
       "type": "bool",
@@ -159,6 +203,25 @@
       "name": "Precision: include releases",
       "description": "Use release windows as inputs in the L* model too.",
       "default": false
+    },
+    "viewer-keep": {
+      "type": "float",
+      "name": "Replay circles: seconds on screen",
+      "description": "How long the coloured circle of a click / release stays visible while watching a replay.",
+      "default": 3.0,
+      "min": 0.5,
+      "max": 20.0
+    },
+    "viewer-tick": {
+      "type": "bool",
+      "name": "Replay circles: show tick",
+      "description": "Also write the tick (frame) number under every circle.",
+      "default": false
     }
+  },
+  "resources": {
+    "sprites": [
+      "resources/*.png"
+    ]
   }
 }

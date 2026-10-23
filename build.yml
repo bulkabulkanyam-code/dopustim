@@ -1,0 +1,67 @@
+name: Build Geode Mod
+
+# Builds the mod for Windows and Android with the official geode-sdk/build-geode-mod action.
+# Run it from the "Actions" tab (Run workflow) or just push.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  # Fast check of the Geode-independent core. Runs in parallel and does NOT block the mod build.
+  tests:
+    name: Core unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B build-tests -DFWM_TESTS_ONLY=ON
+      - run: cmake --build build-tests
+      - run: ctest --test-dir build-tests --output-on-failure
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Windows
+            os: windows-latest
+          - name: Android32
+            os: ubuntu-latest
+            target: Android32
+          - name: Android64
+            os: ubuntu-latest
+            target: Android64
+
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # NOTE: no custom CMake / compiler setup here. The action installs what Geode needs
+      # (on Windows it configures clang-cl itself); forcing "latest" CMake or -DCMAKE_*_COMPILER
+      # on top of that is what broke the previous workflow.
+      - name: Build the mod
+        uses: geode-sdk/build-geode-mod@main
+        with:
+          combine: true
+          target: ${{ matrix.config.target }}
+          # CMake 4 refuses old dependencies (cmake_minimum_required < 3.5); this keeps them building.
+          configure-args: -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+
+  package:
+    name: Package builds
+    runs-on: ubuntu-latest
+    needs: ["build"]
+
+    steps:
+      - uses: geode-sdk/build-geode-mod/combine@main
+        id: build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build Output
+          path: ${{ steps.build.outputs.build-output }}

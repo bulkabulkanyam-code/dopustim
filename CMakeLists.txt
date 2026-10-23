@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(frame_window_mod VERSION 0.1.0 LANGUAGES CXX)
+project(frame_window_mod VERSION 0.3.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -20,6 +20,12 @@ endif()
 # ---------------------------------------------------------------------------
 # Geode mod
 # ---------------------------------------------------------------------------
+# CMake 4 dropped compatibility with projects that declare cmake_minimum_required < 3.5, which some
+# dependencies still do. Harmless on older CMake versions.
+if(NOT DEFINED CMAKE_POLICY_VERSION_MINIMUM)
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+endif()
+
 set(ARC_FEATURE_FULL ON CACHE BOOL "" FORCE)  # async runtime used by the desktop file picker
 
 if(NOT DEFINED ENV{GEODE_SDK})
